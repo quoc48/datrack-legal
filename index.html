@@ -1,1 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DaTrack — AI Expense Tracker for iOS</title>
+    <meta name="description" content="Stop filling out forms. Just type 'coffee 5.50' and it's logged. DaTrack uses AI to track your expenses instantly.">
+    <meta property="og:title" content="DaTrack — AI Expense Tracker">
+    <meta property="og:description" content="Stop filling out forms. Just type your expenses.">
+    <meta property="og:type" content="website">
+    <meta name="apple-itunes-app" content="app-id=6742128498">
+    <style>
+        :root {
+            --base-width: 940px;
+            --card-gap: 16px;
+            --card-radius: 32px;
+            --bg-base: #0a0a0a;
+            --bg-card: rgba(30, 30, 30, 0.6);
+            --bg-card-border: rgba(255, 255, 255, 0.06);
+            --bg-card-glow: rgba(30, 30, 30, 0.4);
+            --text-primary: #f0f0f0;
+            --text-secondary: rgba(255, 255, 255, 0.5);
+            --accent: #C8D84E;
+            --accent-text: #111;
+            --accent-dim: rgba(200, 216, 78, 0.1);
+        }
 
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg-base);
+            color: var(--text-primary);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        /* ─── Navbar ─── */
+        .navbar-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            padding: 28px 20px 0;
+        }
+
+        .navbar-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 140%;
+            background-color: var(--bg-base);
+            -webkit-mask-image: linear-gradient(#000 0%, transparent 100%);
+            mask-image: linear-gradient(#000 0%, transparent 100%);
+            z-index: -1;
+        }
+
+        .navbar-container::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 130%;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            -webkit-mask-image: linear-gradient(#000 0%, transparent 100%);
+            mask-image: linear-gradient(#000 0%, transparent 100%);
+            z-index: -1;
+        }
+
+        .navbar {
+            width: 100%;
+            max-width: var(--base-width);
+            height: 76px;
+            background-color: rgba(35, 35, 35, 0.7);
+            -webkit-backdrop-filter: blur(24px);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(55, 55, 55, 0.8);
+            box-shadow: inset 0 0 25px rgba(35, 35, 35, 0.5);
+            border-radius: 999px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            padding: 0 18px 0 30px;
+        }
+
+        .nav-identity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 11px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow:
+                inset 0 0.5px 0 rgba(255, 255, 255, 0.15),
+                0 1px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .nav-name {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+            justify-self: center;
+        }
+
+        .nav-links a {
+            font-size: 15px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.75);
+            transition: color 0.15s;
+        }
+
+        .nav-links a:hover { color: #fff; }
+
+        .nav-action {
+            justify-self: end;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            color: #000;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: transform 0.15s;
+        }
+
+        .download-btn:hover { transform: scale(1.03); }
+        .download-btn:active { transform: scale(0.97); }
+
+        .download-btn svg { width: 24px; height: 24px; }
+
+        .navbar-spacer { height: 224px; width: 100%; }
+
+        /* ─── Hero ─── */
+        .hero {
+            width: 100%;
+            max-width: var(--base-width);
+            display: grid;
+            grid-template-columns: 1fr 310px;
+            grid-template-rows: minmax(640px, 1fr);
+            grid-template-areas: "content phone";
+            gap: 80px;
+            padding: 0 60px;
+            margin-bottom: 120px;
+        }
+
+        .hero-content {
+            grid-area: content;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding-bottom: 40px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-dim);
+            border: 1px solid rgba(200, 216, 78, 0.15);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent);
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: 66px;
+            font-weight: 900;
+            line-height: 1.03;
+        }
+
+        .hero h1 .accent { color: var(--accent); }
+
+        .hero-sub {
+            margin-top: 16px;
+            font-size: 22px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.75);
+            line-height: 1.2;
+            max-width: 420px;
+        }
+
+        .hero-cta {
+            margin-top: 32px;
+        }
+
+        .hero-phone {
+            grid-area: phone;
+            width: 310px;
+            min-height: 640px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ─── Phone Mockup (Ripples pattern) ─── */
+        .phone-mockup {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: visible;
+        }
+
+        .phone-mockup .bezel {
+            z-index: 1;
+            object-fit: contain;
+            object-position: center;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .phone-mockup .screen-content {
+            z-index: 0;
+            object-fit: contain;
+            object-position: center;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .phone-mockup .phone-shadow {
+            z-index: -1;
+            position: absolute;
+            bottom: -7px;
+            left: 5%;
+            right: 5%;
+            height: 30px;
+            background: radial-gradient(ellipse, rgba(0,0,0,0.6) 0%, transparent 70%);
+            filter: blur(15px);
+            opacity: 0;
+            animation: shadowIn 1.5s ease-out 0.5s forwards;
+        }
+
+        @keyframes shadowIn {
+            to { opacity: 1; }
+        }
+
+        .phone-placeholder {
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.12);
+            font-size: 13px;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* ─── Sections ─── */
+        .section {
+            width: 100%;
+            max-width: var(--base-width);
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 1.2;
+            padding: 0 10px;
+            margin-bottom: 28px;
+        }
+
+        /* ─── Card Grid (Ripples pattern) ─── */
+        .card-grid {
+            --card-gap: 20px;
+            --card-height: 438px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--card-gap);
+            width: 100%;
+            max-width: var(--base-width);
+            padding: 0 20px;
+        }
+
+        .card {
+            --min-w: calc((100% - var(--card-gap) * 2) / 3);
+            height: var(--card-height);
+            background-color: rgba(35, 35, 35, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(55, 55, 55, 0.6);
+            box-shadow: inset 0 0 25px rgba(35, 35, 35, 0.4);
+            border-radius: 35px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card.third { width: var(--min-w); }
+        .card.half { width: calc((100% - var(--card-gap)) / 2); }
+        .card.two-thirds { width: calc(100% - var(--card-gap) - var(--min-w)); }
+        .card.full { width: 100%; }
+
+        /* ── Stacked card ── */
+        .card-stacked {
+            display: grid;
+            width: 100%;
+            height: 100%;
+            grid-template: "media" 3fr "text" 1fr / 1fr;
+        }
+
+        /* Two-thirds cards: side-by-side on desktop */
+        .card.two-thirds .card-stacked.forward {
+            grid-template: "media text" 1fr / 2fr 1fr;
+        }
+        .card.two-thirds .card-stacked.reverse {
+            grid-template: "text media" 1fr / 1fr 2fr;
+        }
+
+        .card-media {
+            grid-area: media;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-media img {
+            object-fit: contain;
+            object-position: center;
+            width: 100%;
+            height: 100%;
+            padding: 30px;
+        }
+
+        .card-media-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.12);
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .card-text {
+            grid-area: text;
+            padding: 30px;
+            display: flex;
+            justify-content: start;
+            align-items: start;
+        }
+
+        .card-text-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .card-text-content p {
+            margin-top: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            line-height: 1.15;
+        }
+
+        /* ── Overlaid card: text over image ── */
+        .card-overlaid {
+            display: flex;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            justify-content: start;
+            align-items: end;
+        }
+
+        .card-overlaid .card-bg {
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .card-overlaid .card-bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-overlaid .card-overlay-text {
+            z-index: 1;
+            color: #fff;
+            padding: 30px;
+            position: relative;
+            width: 100%;
+        }
+
+        .card-overlaid .card-overlay-text::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 110%;
+            background: rgba(0,0,0,0.7);
+            -webkit-mask-image: linear-gradient(transparent 10%, #000 100%);
+            mask-image: linear-gradient(transparent 10%, #000 100%);
+            z-index: -1;
+        }
+
+        .card-overlaid .card-overlay-text h3 {
+            font-size: 24px;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .card-overlaid .card-overlay-text p {
+            margin-top: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.15;
+        }
+
+        /* ── Mobile: all cards full width, stacked vertical ── */
+        @media (max-width: 768px) {
+            .card.third, .card.half, .card.two-thirds, .card.full {
+                width: 100%;
+            }
+            .card.two-thirds .card-stacked.forward,
+            .card.two-thirds .card-stacked.reverse {
+                grid-template: "media" 3fr "text" 1fr / 1fr;
+            }
+        }
+
+        /* ─── Icon Cards (Values) ─── */
+        .icon-card-inner {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+            height: 100%;
+            padding: 30px;
+        }
+
+        .icon-card-icon {
+            width: 40px;
+            height: 40px;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .icon-card-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .icon-card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .icon-card-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.15;
+        }
+
+        .icon-card-info p {
+            font-size: 16px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            line-height: 1.25;
+        }
+
+        /* ─── CTA ─── */
+        .cta {
+            width: 100%;
+            max-width: var(--base-width);
+            text-align: center;
+            padding: 120px 20px 120px;
+        }
+
+        .cta h2 {
+            font-size: clamp(28px, 4vw, 38px);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            margin-bottom: 32px;
+        }
+
+        .cta p {
+            color: var(--text-secondary);
+            font-size: 17px;
+            margin-bottom: 28px;
+        }
+
+        .cta .download-btn-lg {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            color: #000;
+            padding: 14px 28px;
+            border-radius: 999px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: transform 0.15s;
+        }
+
+        .cta .download-btn-lg:hover { transform: scale(1.03); }
+        .cta .download-btn-lg svg { width: 28px; height: 28px; }
+
+        /* ─── Footer ─── */
+        footer {
+            width: 100%;
+            max-width: var(--base-width);
+            padding: 0 20px 40px;
+        }
+
+        .footer-bar {
+            background: rgba(35, 35, 35, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: none;
+            box-shadow: inset 0 0 25px rgba(35, 35, 35, 0.4);
+            border-radius: var(--card-radius);
+            padding: 28px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 11px;
+            overflow: hidden;
+            filter: grayscale(1);
+            opacity: 0.5;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow:
+                inset 0 0.5px 0 rgba(255, 255, 255, 0.15),
+                0 1px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .footer-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+        }
+
+        .footer-links a {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.75);
+            transition: color 0.15s;
+        }
+
+        .footer-links a:hover { color: #fff; }
+
+        .footer-note {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 16px;
+            padding: 0 32px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* ─── Scroll Reveal ─── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            .navbar {
+                display: flex;
+                justify-content: space-between;
+                padding: 0 18px 0 22px;
+            }
+
+            .nav-links { display: none; }
+
+            .navbar-container { padding: 12px 12px 0; }
+
+            .hero {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+                grid-template-areas: "content" "phone";
+                text-align: center;
+                gap: 40px;
+                padding: 0 24px;
+                min-height: auto;
+            }
+
+            .hero-content {
+                align-items: center;
+                padding: 0 10px;
+                padding-bottom: 0;
+            }
+
+            .hero h1 { font-size: 52px; }
+            .hero-sub { font-size: 20px; max-width: none; }
+            .hero-phone { justify-self: center; width: 310px; min-height: 640px; }
+
+            .hero { margin-bottom: 60px; }
+            .section { padding: 0 12px; }
+            .section[style*="margin-top"] { margin-top: 60px !important; }
+            .section-title { padding: 0 8px; }
+            .cta { padding: 60px 20px 80px; }
+            .navbar-spacer { height: 140px; }
+
+            .footer-bar {
+                flex-direction: column;
+                gap: 24px;
+                padding: 28px;
+            }
+
+            .footer-links { gap: 16px; }
+
+            .footer-note {
+                flex-direction: column;
+                gap: 4px;
+                text-align: center;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .hero {
+                grid-template-columns: 1fr 260px;
+                gap: 50px;
+                padding: 0 30px;
+            }
+
+            .hero h1 { font-size: 52px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ─── Navbar ─── -->
+    <div class="navbar-container">
+        <nav class="navbar">
+            <div class="nav-identity">
+                <div class="nav-icon"><img src="app-icon.png" alt="DaTrack"></div>
+                <span class="nav-name">DaTrack</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="javascript:void(0)" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Features</a></li>
+                <li><a href="mailto:thanh.quoc731@gmail.com">Contact</a></li>
+            </ul>
+            <div class="nav-action">
+                <a href="https://apps.apple.com/app/datrack-daily-expense-tracker/id6742128498" class="download-btn">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                    Download
+                </a>
+            </div>
+        </nav>
+    </div>
+    <div class="navbar-spacer"></div>
+
+    <!-- ─── Hero ─── -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge reveal">
+                <svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M208,144a15.78,15.78,0,0,1-10.42,14.94L146,178l-19,51.62a15.92,15.92,0,0,1-29.88,0L78,178l-51.62-19a15.92,15.92,0,0,1,0-29.88L78,110l19-51.62a15.92,15.92,0,0,1,29.88,0L146,110l51.62,19A15.78,15.78,0,0,1,208,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z"/></svg>
+                AI-powered
+            </div>
+            <h1 class="reveal"><span style="white-space:nowrap">Daily Expenses</span><br>Tracker</h1>
+            <p class="hero-sub reveal">Expense tracking should be effortless. Type what you spent — AI handles the rest.</p>
+            <div class="hero-cta reveal">
+                <a href="https://apps.apple.com/app/datrack-daily-expense-tracker/id6742128498" class="download-btn">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                    Download
+                </a>
+            </div>
+        </div>
+        <div class="hero-phone reveal">
+            <div class="phone-mockup">
+                <img class="bezel" src="bezel.png" alt="">
+
+                <!-- Replace with video or screenshot: -->
+                <!-- <video class="screen-content" autoplay muted loop playsinline src="demo.mp4"></video> -->
+                <!-- <img class="screen-content" src="hero-screenshot.png" alt="DaTrack"> -->
+
+                <div class="phone-placeholder">Drop video or<br>screenshot here</div>
+                <div class="phone-shadow"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Features ─── -->
+    <section id="features">
+        <div class="card-grid">
+            <!-- AI Text Input — 2/3 (stacked, image left text right) -->
+            <div class="card two-thirds reveal">
+                <div class="card-stacked forward">
+                    <div class="card-media">
+                        <!-- Replace: <img src="feat-ai-input.png" alt="AI Text Input"> -->
+                        <div class="card-media-placeholder">AI input screenshot</div>
+                    </div>
+                    <div class="card-text">
+                        <div class="card-text-content">
+                            <h3>AI Text Input</h3>
+                            <p>Type expenses like a message. AI parses amount, category, and date.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receipt Scanner — 1/3 (stacked, image top text bottom) -->
+            <div class="card third reveal">
+                <div class="card-stacked">
+                    <div class="card-media">
+                        <!-- Replace: <img src="feat-scan.png" alt="Receipt Scanner"> -->
+                        <div class="card-media-placeholder">Scan screenshot</div>
+                    </div>
+                    <div class="card-text">
+                        <div class="card-text-content">
+                            <h3>Receipt Scanner</h3>
+                            <p>Point your camera. Every item extracted in seconds.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar — 1/3 (stacked, image top text bottom) -->
+            <div class="card third reveal">
+                <div class="card-stacked">
+                    <div class="card-media">
+                        <!-- Replace: <img src="feat-calendar.png" alt="Calendar View"> -->
+                        <div class="card-media-placeholder">Calendar screenshot</div>
+                    </div>
+                    <div class="card-text">
+                        <div class="card-text-content">
+                            <h3>Calendar View</h3>
+                            <p>See your spending at a glance. Every day, beautifully laid out.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics — 2/3 (stacked, text left image right) -->
+            <div class="card two-thirds reveal">
+                <div class="card-stacked reverse">
+                    <div class="card-media">
+                        <!-- Replace: <img src="feat-stats.png" alt="Statistics"> -->
+                        <div class="card-media-placeholder">Statistics screenshot</div>
+                    </div>
+                    <div class="card-text">
+                        <div class="card-text-content">
+                            <h3>Statistics</h3>
+                            <p>Monthly charts. Category donut. See exactly where your money goes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget — full (overlaid, text over image) -->
+            <div class="card full reveal">
+                <div class="card-overlaid">
+                    <div class="card-bg">
+                        <!-- Replace: <img src="feat-budget.png" alt="Budget Tracking"> -->
+                        <div class="card-media-placeholder">Budget screenshot</div>
+                    </div>
+                    <div class="card-overlay-text">
+                        <h3>Budget Tracking</h3>
+                        <p>Set a monthly budget and track it in real-time.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Values ─── -->
+    <section class="section" style="margin-top: 120px;">
+        <h2 class="section-title reveal" style="padding: 0 30px; font-size: 34px; font-weight: 700; margin-bottom: 32px;">An app with values</h2>
+        <div class="card-grid">
+            <div class="card third reveal" style="height: 260px;">
+                <div class="icon-card-inner">
+                    <div class="icon-card-icon">
+                        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96Z"/></svg>
+                    </div>
+                    <div class="icon-card-info">
+                        <h3>Private by design</h3>
+                        <p>All data stored locally on your device. No servers, no tracking.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card third reveal" style="height: 260px;">
+                <div class="icon-card-inner">
+                    <div class="icon-card-icon">
+                        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M230.93,220a8,8,0,0,1-6.93,4H32a8,8,0,0,1-6.92-12c15.23-26.33,38.7-45.21,66.09-54.16a72,72,0,1,1,73.66,0c27.39,8.95,50.86,27.83,66.09,54.16A8,8,0,0,1,230.93,220Z"/></svg>
+                    </div>
+                    <div class="icon-card-info">
+                        <h3>No account needed</h3>
+                        <p>Open the app and start tracking. No sign-up, no password.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card third reveal" style="height: 260px;">
+                <div class="icon-card-inner">
+                    <div class="icon-card-icon">
+                        <svg viewBox="0 0 256 256" fill="currentColor"><path d="M208,144a15.78,15.78,0,0,1-10.42,14.94L146,178l-19,51.62a15.92,15.92,0,0,1-29.88,0L78,178l-51.62-19a15.92,15.92,0,0,1,0-29.88L78,110l19-51.62a15.92,15.92,0,0,1,29.88,0L146,110l51.62,19A15.78,15.78,0,0,1,208,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z"/></svg>
+                    </div>
+                    <div class="icon-card-info">
+                        <h3>AI-powered</h3>
+                        <p>Not another form app. AI understands your language and logs for you.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── CTA ─── -->
+    <section class="cta">
+        <h2 class="reveal">Try Pro free for 30 days.<br>Cancel anytime.</h2>
+        <a href="https://apps.apple.com/app/datrack-daily-expense-tracker/id6742128498" class="download-btn reveal">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            Download
+        </a>
+    </section>
+
+    <!-- ─── Footer ─── -->
+    <footer>
+        <div class="footer-bar">
+            <div class="footer-left">
+                <div class="footer-icon"><img src="app-icon.png" alt="DaTrack"></div>
+            </div>
+            <ul class="footer-links">
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="terms.html">Terms of Use</a></li>
+            </ul>
+        </div>
+        <div class="footer-note">
+            <span>&copy; 2026 Quoc Phan</span>
+        </div>
+    </footer>
+
+    <!-- ─── Scripts ─── -->
+    <script>
+        // Force scroll to top on load
+        if (history.scrollRestoration) history.scrollRestoration = 'manual';
+        window.scrollTo(0, 0);
+        window.addEventListener('load', () => setTimeout(() => window.scrollTo(0, 0), 0));
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+
+</body>
+</html>
