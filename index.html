@@ -684,57 +684,60 @@
             transform: translateY(0);
         }
 
-        /* ─── Responsive ─── */
+        /* ─── Responsive (Ripples pattern: 768px breakpoint) ─── */
         @media (max-width: 768px) {
+            /* Navbar */
+            .navbar-container { padding: 12px 12px 0; }
             .navbar {
                 display: flex;
                 justify-content: space-between;
                 padding: 0 18px 0 22px;
             }
-
             .nav-links { display: none; }
-
-            .navbar-container { padding: 12px 12px 0; }
-
-            .hero {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto;
-                grid-template-areas: "content" "phone";
-                text-align: center;
-                gap: 40px;
-                padding: 0 24px;
-                min-height: auto;
-            }
-
-            .hero-content {
-                align-items: center;
-                padding: 0 10px;
-                padding-bottom: 0;
-            }
-
-            .hero {
-                margin-bottom: 60px;
-                justify-items: center;
-            }
-            .hero h1 { font-size: 44px; }
-            .hero-sub { font-size: 18px; max-width: none; }
-            .hero-phone { justify-self: center; width: 280px; min-height: 580px; }
-
-            .section { padding: 0 12px; }
-            .section .card-grid { padding: 0; }
-            .section[style*="margin-top"] { margin-top: 60px !important; }
-            .section-title { padding: 0 8px; }
-            .cta { padding: 60px 20px 80px; }
             .navbar-spacer { height: 140px; }
 
-            .footer-bar {
-                flex-direction: column;
-                gap: 24px;
-                padding: 28px;
+            /* Hero — Ripples: single column, content centered, phone keeps min-height */
+            .hero {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto minmax(640px, auto);
+                grid-template-areas: "content" "phone";
+                gap: 40px;
+                padding: 0 30px;
+                margin-bottom: 60px;
+            }
+            .hero-content {
+                text-align: center;
+                align-items: center;
+                padding: 0 20px;
+                padding-bottom: 0;
+            }
+            .hero h1 { font-size: 52px; }
+            .hero-sub { font-size: 20px; max-width: none; }
+            .hero-phone { justify-self: center; }
+            .hero-cta .download-btn { }
+
+            /* Card grid — Ripples: column layout, 30px gap, all cards full width */
+            .card-grid {
+                gap: 30px;
+                padding: 0 20px;
+            }
+            .card.third, .card.half, .card.two-thirds, .card.full {
+                width: 100% !important;
             }
 
-            .footer-links { gap: 16px; }
+            /* Sections */
+            .section { padding: 0; }
+            .section[style*="margin-top"] { margin-top: 60px !important; }
+            .section-title { padding: 0 20px !important; }
+            .cta { padding: 60px 20px 80px; }
 
+            /* Footer — Ripples: column, wider gap */
+            .footer-bar {
+                flex-direction: column;
+                gap: 48px;
+                padding: 32px 32px 40px;
+            }
+            .footer-links { gap: 16px; }
             .footer-note {
                 flex-direction: column;
                 gap: 4px;
@@ -748,7 +751,6 @@
                 gap: 50px;
                 padding: 0 30px;
             }
-
             .hero h1 { font-size: 52px; }
         }
     </style>
