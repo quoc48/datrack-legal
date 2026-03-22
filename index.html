@@ -513,7 +513,10 @@
         /* ── Mobile: all cards full width, stacked vertical ── */
         @media (max-width: 768px) {
             .card.third, .card.half, .card.two-thirds, .card.full {
-                width: 100%;
+                width: 100% !important;
+            }
+            .card-grid {
+                padding: 0 12px;
             }
             .card.two-thirds .card-stacked.forward,
             .card.two-thirds .card-stacked.reverse {
