@@ -259,13 +259,13 @@
 
         .phone-mockup .screen-content {
             z-index: 0;
-            object-fit: contain;
-            object-position: center;
-            width: 100%;
-            height: 100%;
+            object-fit: cover;
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 2.8%;
+            left: 5.5%;
+            width: 89%;
+            height: 94.2%;
+            border-radius: 36px;
         }
 
         .phone-mockup .phone-shadow {
@@ -283,6 +283,42 @@
 
         @keyframes shadowIn {
             to { opacity: 1; }
+        }
+
+        .video-controls {
+            z-index: 2;
+            position: absolute;
+            bottom: 4%;
+            right: -37px;
+        }
+
+        .video-controls button {
+            background-color: rgba(80, 80, 80, 0.85);
+            width: 24px;
+            height: 24px;
+            color: var(--text-primary);
+            cursor: pointer;
+            border: none;
+            border-radius: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.1s ease-in-out;
+        }
+
+        .video-controls button:hover { opacity: 0.7; }
+
+        .video-controls button svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .video-controls {
+                right: 50%;
+                transform: translateX(50%);
+                bottom: -36px;
+            }
         }
 
         .phone-placeholder {
@@ -748,11 +784,13 @@
             <div class="phone-mockup">
                 <img class="bezel" src="bezel.png" alt="">
 
-                <!-- Replace with video or screenshot: -->
-                <!-- <video class="screen-content" autoplay muted loop playsinline src="demo.mp4"></video> -->
-                <!-- <img class="screen-content" src="hero-screenshot.png" alt="DaTrack"> -->
-
-                <div class="phone-placeholder">Drop video or<br>screenshot here</div>
+                <video class="screen-content" autoplay muted loop playsinline src="demo.mp4" id="heroVideo"></video>
+                <div class="video-controls">
+                    <button id="playPauseBtn" aria-label="Pause video">
+                        <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+                        <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="display:none"><path d="M8 5.14v14.72a1 1 0 0 0 1.5.86l11-7.36a1 1 0 0 0 0-1.72l-11-7.36A1 1 0 0 0 8 5.14z"/></svg>
+                    </button>
+                </div>
                 <div class="phone-shadow"></div>
             </div>
         </div>
@@ -916,6 +954,24 @@
             entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
         }, { threshold: 0.15 });
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Video: 1.5x speed + play/pause toggle
+        const video = document.getElementById('heroVideo');
+        const btn = document.getElementById('playPauseBtn');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const playIcon = document.getElementById('playIcon');
+        video.playbackRate = 1.5;
+        btn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                pauseIcon.style.display = '';
+                playIcon.style.display = 'none';
+            } else {
+                video.pause();
+                pauseIcon.style.display = 'none';
+                playIcon.style.display = '';
+            }
+        });
     </script>
 
 </body>
