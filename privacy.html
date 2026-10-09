@@ -27,12 +27,12 @@
 </head>
 <body>
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: March 10, 2026</p>
+    <p class="updated">Last updated: October 9, 2026</p>
 
     <p>DaTrack is a personal expense tracker built by Quoc Phan. Your privacy matters. This policy explains what data we collect and how we handle it.</p>
 
     <h2>What Data We Collect</h2>
-    <p>Almost nothing. DaTrack stores all your expense data locally on your device. We do not collect, transmit, or store your personal or financial data on any server.</p>
+    <p>Almost nothing. DaTrack stores all your expense data locally on your device. We do not store your personal or financial data on any server. The only data that leaves your device is the text or image you choose to send to the AI features, anonymous usage analytics, and subscription status (details below).</p>
     <ul>
         <li>No account creation or login required</li>
         <li>No personal information collected</li>
@@ -40,13 +40,27 @@
     </ul>
 
     <h2>Third-Party Services</h2>
-    <p>DaTrack uses two third-party services:</p>
+    <p>DaTrack uses these third-party services:</p>
 
     <p><strong>Google Gemini (via OpenRouter)</strong></p>
     <ul>
         <li>Used for AI-powered expense parsing (text and receipt images)</li>
         <li>Data is sent for processing only and is not stored on external servers</li>
         <li>Only activated when you explicitly enable AI processing (see below)</li>
+    </ul>
+
+    <p><strong>Cloudflare and Supabase (our AI relay)</strong></p>
+    <ul>
+        <li>AI requests travel from the app through our own relay server, hosted on Cloudflare Workers with a backup on Supabase Edge Functions, before reaching Google Gemini</li>
+        <li>The relay only forwards the request and returns the answer. It does not store or log your text or images</li>
+        <li>It exists so that no API keys are kept inside the app</li>
+    </ul>
+
+    <p><strong>TelemetryDeck</strong></p>
+    <ul>
+        <li>Anonymous usage analytics (for example, which screens and features are used) to help improve the app</li>
+        <li>No names, emails, expense amounts or other personal data are sent, and the data is not linked to your identity</li>
+        <li><a href="https://telemetrydeck.com/privacy/" target="_blank">TelemetryDeck Privacy Policy</a></li>
     </ul>
 
     <p><strong>RevenueCat</strong></p>
@@ -62,14 +76,14 @@
     <ul>
         <li>You must explicitly grant consent</li>
         <li>No data is sent without your action</li>
-        <li>Text and images are processed in real-time and not stored externally</li>
+        <li>Text and images pass through our relay and are processed in real time, not stored by us</li>
     </ul>
 
     <h2>Data Storage</h2>
     <p>All expense data is stored locally on your device using Apple's SwiftData framework. We have no access to your data. If you delete the app, your data is deleted with it.</p>
 
-    <h2>No Analytics, Tracking, or Ads</h2>
-    <p>DaTrack does not use any analytics SDKs, tracking tools, or advertising networks. We do not track your behavior or serve ads.</p>
+    <h2>No Tracking or Ads</h2>
+    <p>DaTrack does not use tracking tools or advertising networks, and does not track you across other apps or websites. The only analytics are the anonymous usage signals described above.</p>
 
     <h2>Children's Privacy</h2>
     <p>DaTrack is not directed at children under 13. We do not knowingly collect data from children. If you believe a child has provided data through the app, please contact us.</p>
